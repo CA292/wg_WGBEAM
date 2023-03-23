@@ -14,10 +14,10 @@ library(tidyr)
 library(worms)
 library(mapdata)
 
-setwd("C:/Users/XXX/ICES/WGBEAM/script")  ### Please insert here the working directory, or press ctr+shift+h and navigate to the right folder
+#setwd("C:/Users/XXX/ICES/WGBEAM/script")  ### Please insert here the working directory, or press ctr+shift+h and navigate to the right folder
 
 survey <- "BTS"      # Please select the type of survey you want to analyze
-year <- c(2000:2018) # Please select the period in which you want to perform the analysis
+year <- c(2000:2022) # Please select the period in which you want to perform the analysis
 
 ## Get station data from Datras 
 getSurveyList() # gives overview of all survey acronyms
@@ -32,8 +32,8 @@ table(tmp$Year)
 table(tmp$Quarter)
 table(tmp$Country)
 
-tmp1<-tmp %>% select(Year, Quarter, Country, Ship, Survey, Gear, StNo, HaulNo, Month, Day, 
-                     Stratum, HaulDur,DayNight,ShootLat, ShootLong, HaulLat, HaulLong, StatRec, 
+tmp1<-tmp %>% dplyr::select(Year, Quarter, Country, Ship, Survey, Gear, StNo, HaulNo, Month, Day, 
+                     DepthStratum, HaulDur,DayNight,ShootLat, ShootLong, HaulLat, HaulLong, StatRec, 
                      Depth, HaulVal, DataType, Rigging, Tickler, Distance, GroundSpeed, 
                      SurTemp, BotTemp, SurSal, BotSal)
 
@@ -58,7 +58,7 @@ table(tmpf$Quarter)
 table(tmpf$Country)
 table(tmpf$Country, tmpf$Year)
 
-tmpf1<-tmpf %>% select(Year, Quarter, Country, Ship, Survey, Gear, StNo, HaulNo, 
+tmpf1<-tmpf %>% dplyr::select(Year, Quarter, Country, Ship, Survey, Gear, StNo, HaulNo, 
                        SpecCode, SpecVal, Sex, TotalNo, CatIdentifier, NoMeas, 
                        SubFactor, SubWgt, CatCatchWgt, LngtCode, LngtClass, HLNoAtLngt, Valid_Aphia)
 
@@ -92,7 +92,7 @@ table(dat$Country)
 dat$Valid_Aphia <- as.integer(dat$Valid_Aphia)
 sp <- worms::wormsbyid(unique(dat$Valid_Aphia))
 ## Tidy up the species list
-sp1<-sp %>% select(Valid_Aphia=AphiaID,scientificname)
+sp1<-sp %>% dplyr::select(Valid_Aphia=AphiaID,scientificname)
 
 ## Join species name from worms
 dat <- dat %>% 
@@ -104,9 +104,9 @@ dat <- dat %>%
 ################################################
 
 # comparison between 2017 and 2018 survey #
- dat1 <- dat %>% dplyr::filter(Year %in% c("2017","2018"))
+ dat1 <- dat %>% dplyr::filter(Year %in% c("2021","2022"))
  
- lastYS <- 2018  # put the last survey year
+ lastYS <- 2022  # put the last survey year
 
 # Find the first year of appearance of the species in the period selected 
 first_year_db <-dat1 %>% dplyr::group_by(scientificname) %>%dplyr::summarise(first_year = min(Year));first_year_db 

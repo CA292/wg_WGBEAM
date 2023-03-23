@@ -9,6 +9,7 @@
 # 25/03/2020
 #
 # Updated on 26/03/2021 by Loes
+# updated on 23/03/2023 by Chyanna Allison (Cefas, UK)
 #################################################################################
 # clear environment
 rm(list=ls()) 
@@ -30,7 +31,7 @@ getSurveyList() # gives overview of all survey acronyms
 
 tmp<-getDATRAS(record = "HH",
                survey = "DYFS",   #only 1 survey at a time
-               years= 2004:2020,
+               years= 2004:2022,
                quarters = 1:4)
 
 # look what's there
@@ -57,7 +58,7 @@ for (Var in names(tmp1)) {
 ## Get length (HL) data from Datras
 tmpf<-getDATRAS(record = "HL",
                 survey = "DYFS",   #only 1 survey at a time
-                years= 2004:2020,
+                years= 2004:2022,
                 quarters = 1:4)
 
 # look what's there
@@ -83,7 +84,7 @@ for (Var in names(tmpf1)) {
 ## Get age (CA) data from Datras
 tmpa<-getDATRAS(record = "CA",
                 survey = "DYFS",   #only 1 survey at a time
-                years= 2004:2020,
+                years= 2004:2022,
                 quarters = 1:4)
 
 # look whats there
@@ -251,12 +252,12 @@ number_measured <- number_measured %>%
   group_by(Country, Ship, Survey, Gear, Year) %>% 
   summarize(NumMeas = sum(NoMeas))
 
-ggplot(number_measured %>% filter(Year %in% c(2017:2020)))+
+ggplot(number_measured %>% filter(Year %in% c(2017:2022)))+
   geom_bar(aes(x=Year, y=NumMeas, fill=Country), stat = "identity", position="dodge") +
   facet_wrap(Country~Ship)
 
 number_measured_last3years <- number_measured %>% 
-  filter(Year %in% c(2017:2020))
+  filter(Year %in% c(2017:2022))
 
 number_measured_last3years[is.na(number_measured_last3years)] <- 0
 
@@ -321,9 +322,9 @@ mapbyhaul <-
   ggplot()+
   theme_light()+
   geom_polygon(data=m,aes(long,lat,group=group),fill=NA,color="grey") +  #plot the land
-  geom_point(data=byhaul %>% filter(Year %in% c(2015:2020)),
+  geom_point(data=byhaul %>% filter(Year %in% c(2015:2022)),
              (aes(ShootLong,ShootLat, colour=Country, size=sqrt_fishkm2)), alpha=0.4) +  #plot catches by haul
-  geom_point(data=stations %>% filter(Year %in% c(2015:2020)), aes(ShootLong,ShootLat), shape='.', size=0.05) +  #plot the fished stations
+  geom_point(data=stations %>% filter(Year %in% c(2015:2022)), aes(ShootLong,ShootLat), shape='.', size=0.05) +  #plot the fished stations
   facet_wrap(~Year,dir='v')+
   labs(x = "Longitude (Degrees)", y = "Latitude (Degrees)", title = paste(ispec, "CPUE by haul", sep=" "), fill="CPUE (sqrt n/km^2)") +
   coord_quickmap(xlim = c(xmin, xmax), ylim = c(ymin, ymax)) +
@@ -375,10 +376,10 @@ my_breaks<-c(0,100, 200, 300, 400, 500,1000,1500,2000,2500,3000)
 mapbystatrec <-
 ggplot()+
   theme_light()+
-  geom_tile(data=bystatrec %>%  filter(Year %in% c(2016:2019)),aes(lon,lat,fill=mean_sqrt_fishkm2)) + #color statrec tiles based on mean cpue values
+  geom_tile(data=bystatrec %>%  filter(Year %in% c(2016:2022)),aes(lon,lat,fill=mean_sqrt_fishkm2)) + #color statrec tiles based on mean cpue values
   scale_fill_continuous(low="yellow",high="red",trans="log")+
   geom_polygon(data=m,aes(long,lat,group=group), fill="grey") +  #plot the land
-  geom_point(data=stations %>% filter(Year %in% c(2016:2019)),aes(ShootLong,ShootLat),shape=".")+ #plot fished stations
+  geom_point(data=stations %>% filter(Year %in% c(2016:2022)),aes(ShootLong,ShootLat),shape=".")+ #plot fished stations
   facet_wrap(~Year,dir='v')+
   labs(x = "Longitude (Degrees)", y = "Latitude (Degrees)", title = paste(ispec, "mean CPUE by StatRec", sep=" "), fill="Mean CPUE (sqrt n/km^2)") +
   coord_quickmap(xlim = c(xmin, xmax), ylim = c(ymin, ymax)) +
@@ -445,12 +446,105 @@ plotLFD2 <- ggplot(data=LFD.std, aes(x=Length, y=lenf.std)) + geom_line(size=1)
 plotLFD2 <- plotLFD2 +   facet_grid(Year~Country) 
 plotLFD2
 
-plotLFD3 <- ggplot(data=LFD.std %>%  filter(Year %in% c(2012:2020)), aes(x=Length, y=lenf.std)) + geom_line(size=1, aes(color=Country))
+plotLFD3 <- ggplot(data=LFD.std %>%  filter(Year %in% c(2012:2022)), aes(x=Length, y=lenf.std)) + geom_line(size=1, aes(color=Country))
 plotLFD3 <- plotLFD3 +   facet_grid(Survey~Year) 
 plotLFD3
 
 # setwd(outputpath)
 # ggsave(filename = paste(ispec, "std_raised_LFD_by_year.png"), plot = last_plot(), width=10,height=8, dpi=600)
+
+##### Length Frequency - Before Bootstrapping #### ## Further analysis needed ##
+
+# convert to mm 
+datspec[datspec$LngtCode == "1" & !is.na(datspec$LngtCode),]$LngtClass <- datspec[datspec$LngtCode == "1" & !is.na(datspec$LngtCode),]$LngtClass * 10
+datspec[datspec$LngtCode == "2" & !is.na(datspec$LngtCode),]$LngtClass <- datspec[datspec$LngtCode == "2" & !is.na(datspec$LngtCode),]$LngtClass * 10
+datspec[datspec$LngtCode == "5" & !is.na(datspec$LngtCode),]$LngtClass <- datspec[datspec$LngtCode == "5" & !is.na(datspec$LngtCode),]$LngtClass * 10
+datspec[datspec$LngtCode == "0" & !is.na(datspec$LngtCode),]$LngtClass <- datspec[datspec$LngtCode == "0" & !is.na(datspec$LngtCode),]$LngtClass * 10
+
+# Basic map per year
+HL_LengthFreq <- datspec %>% filter(SpecVal == 1) %>%
+  filter(LngtClass < 150) %>%
+  group_by(Country, Year, LngtClass) %>%
+  summarize(NumMeasHL = sum(HLNoAtLngt, na.rm = T)) %>% mutate(Tot = round(sum(NumMeasHL),0)) %>%
+  filter(Year > 2017) 
+
+ggplot(HL_LengthFreq)+
+  geom_line(aes(x=LngtClass, y=NumMeasHL, colour=Country),stat = "identity")+
+  facet_wrap(~Year)
+
+ggsave(filename = paste(ispec, "LengthFreq_5Yr.png"), plot = last_plot(), width=10,height=8, dpi=600)
+
+HL_LengthFreq <- datspec %>% filter(SpecVal == 1) %>%
+  filter(LngtClass < 150) %>%
+  group_by(Country, Year, LngtClass) %>%
+  summarize(NumMeasHL = sum(HLNoAtLngt, na.rm = T)) %>% mutate(Tot = round(sum(NumMeasHL),0)) %>% 
+  filter(Year > 2010)
+
+ggplot(HL_LengthFreq)+
+  geom_line(aes(x=LngtClass, y=NumMeasHL, colour=Country),stat = "identity")+
+  facet_wrap(~Year)
+
+ggsave(filename = paste(ispec, "LengthFreq_12Yr.png"), plot = last_plot(), width=10,height=8, dpi=600)
+
+
+#HL_LengthFreq2 <- datspec %>% filter(SpecVal == 1) %>%   filter(LngtClass < 150) %>%   group_by(Year, LngtClass) %>%   summarize(NumMeasHL = sum(HLNoAtLngt, na.rm = T)) %>% mutate(Tot = round(sum(NumMeasHL),0), maxVal = max(NumMeasHL)) %>% filter(Year > 2016)
+
+# Lng <- HL_LengthFreq2 %>% filter(NumMeasHL == maxVal)
+
+HL_LengthFreq3 <- datspec %>% filter(SpecVal == 1) %>%
+  filter(LngtClass < 150) %>%
+  group_by(Country, Year, Ship, StNo, HaulNo, LngtClass) %>%
+  summarize(NumMeasHL = sum(HLNoAtLngt, na.rm = T)) %>% mutate(Tot = round(sum(NumMeasHL),0), GrpSamp = ifelse(Tot <= 50, "A: <51 sample per haul", ifelse(Tot > 50 & Tot <= 100, "B: 51-100 sample per haul", ifelse(Tot > 100 & Tot <= 250, "C: 101-250 sample per haul",ifelse(Tot > 250 & Tot <= 500, "D: 251-500 sample per haul",ifelse(Tot > 500, "E: >500 sample per haul",NA)))))) %>% filter(Year > 2016) %>% filter(Year < 2022) %>% filter(NumMeasHL > 0) %>% filter(!(StNo ==	"634_62" & NumMeasHL == 65)) %>% filter(!(LngtClass <= 3))
+
+HL_LengthFreqAV <- HL_LengthFreq3 %>%
+  group_by(LngtClass, GrpSamp) %>%
+  summarize(NumMeasHL = mean(NumMeasHL, na.rm = T))%>% filter(NumMeasHL > 0)
+
+ggplot()+
+  #geom_bar(HL_LengthFreq2, mapping = aes(x=LngtClass, y=NumMeasHL),color= "light blue",stat = "identity")+
+  geom_point(HL_LengthFreq3, mapping = aes(x=LngtClass, y=NumMeasHL), colour = "light blue", shape = 8)+
+  geom_smooth(HL_LengthFreq3, mapping = aes(x=LngtClass, y=NumMeasHL),se=F, col='red', size=2)+
+  geom_line(HL_LengthFreqAV, mapping = aes(x=LngtClass, y=NumMeasHL),stat = "identity",colour="black", size =0.5)+
+  facet_wrap(~GrpSamp)+ #, scales = "free_y"
+  scale_y_continuous(limits = c(0,max(HL_LengthFreq3$LngtClass)), expand = expansion(mult = c(0,0.05)))
+
+ggsave(filename = paste(ispec, "LengthClasses.png"), plot = last_plot(), width=10,height=8, dpi=600)
+
+#### MAIN ONE TO USE #####
+
+ggplot()+
+  #geom_bar(HL_LengthFreq2, mapping = aes(x=LngtClass, y=NumMeasHL),color= "light blue",stat = "identity")+
+  geom_point(HL_LengthFreq3, mapping = aes(x=LngtClass, y=NumMeasHL), colour = "light blue", shape = 8)+
+  geom_smooth(HL_LengthFreq3, mapping = aes(x=LngtClass, y=NumMeasHL),se=F, col='red', size=2)+
+  geom_line(HL_LengthFreqAV, mapping = aes(x=LngtClass, y=NumMeasHL),stat = "identity",colour="black", size =0.5)+
+  facet_wrap(~GrpSamp, scales = "free_y")+
+  scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0,0.05)))
+
+ggsave(filename = paste(ispec, "LengthClassesYAxis.png"), plot = last_plot(), width=10,height=8, dpi=600)
+
+# Distribution map 
+HL_Map <- datspec %>%
+  group_by(Year, ShootLat, ShootLong, Country) %>%
+  summarize(NumMeasHL = sum(HLNoAtLngt, na.rm = T))
+
+rangex <- c(min(HL_Map$ShootLong,na.rm=T)-1,max(HL_Map$ShootLong,na.rm=T)+1)
+rangey <- c(min(HL_Map$ShootLat,na.rm=T)-1,max(HL_Map$ShootLat,na.rm=T)+1)
+
+Chart2 <- ggplot()+
+  ggtitle(paste0("DYFS Survey 2022","\n", ispec, sep=" "))+
+  labs(subtitle =  "Number measured in each haul")+
+  geom_point(data = HL_Map,  aes(x =ShootLong, y = ShootLat, size = NumMeasHL, colour= Country), stat = "identity", alpha = 0.5) +
+  scale_size_continuous(range = c(.001, 5), name="Count")+
+  borders("world", xlim = rangex, ylim = rangey, fill = "grey", colour = "light grey") +
+  coord_quickmap(xlim = rangex, ylim = rangey) +
+  theme(plot.title = element_text(face="bold"), panel.grid.minor = element_line(colour = "NA") )+
+  xlab("Longitude") +
+  ylab("Latitude") 
+Chart2
+
+ggsave(filename = paste("DYFSCount.png",sep = ""), width = 30, height = 20, units = "cm")
+
+
 
 ##########################################
 ##########################################
